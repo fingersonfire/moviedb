@@ -1,0 +1,136 @@
+<div class="content">
+	<h2>{$smarty.const.USER_MANAGEMENT|htmlentities:3:'UTF-8'}</h2>
+	
+	<h3>{$smarty.const.NEW_USER|htmlentities:3:'UTF-8'}</h3>
+	
+	<form id="form" method="POST">
+	<table>
+		<tr>
+			<td style="width: 140px;">			
+				{$smarty.const.USER_NAME|htmlentities:3:'UTF-8'}:
+			</td>
+			<td>
+				<input type="text" id="username" name="username" value="{if isset($newuser)}{$newuser->username|htmlentities:3:'UTF-8'}{/if}" style="width: 150px;" class="required">
+			</td>
+		</tr>
+		<tr>
+			<td>			
+				{$smarty.const.EMAIL|htmlentities:3:'UTF-8'}:
+			</td>
+			<td>
+				<input type="text" name="email" value="{if isset($newuser)}{$newuser->email|htmlentities:3:'UTF-8'}{/if}" style="width: 250px;" class="required email">
+			</td>
+		</tr>
+		
+		<tr>
+			<td>			
+				{$smarty.const.PASSWORD|htmlentities:3:'UTF-8'}:
+			</td>
+			<td>
+				<input type="password" id="password" name="password" value="" style="width: 150px;">
+			</td>
+		</tr>
+		<tr>
+			<td>			
+				{$smarty.const.PASSWORD|htmlentities:3:'UTF-8'} ({$smarty.const.AGAIN|htmlentities:3:'UTF-8'}):
+			</td>
+			<td>
+				<input type="password" id="password2" name="password2" value="" style="width: 150px;">
+			</td>
+		</tr>
+		<tr>
+			<td>			
+				{$smarty.const.ROLE|htmlentities:3:'UTF-8'}:
+			</td>
+			<td>
+				<select name="permission" class="required" style="width: 155px;">
+					<option value="0"{if isset($newuser) && $newuser->permission == 0} selected{/if}>{$smarty.const.GUEST|htmlentities:3:'UTF-8'}</option>
+					<option value="1"{if isset($newuser) && $newuser->permission == 1} selected{/if}>{$smarty.const.EDITOR|htmlentities:3:'UTF-8'}</option>
+					<option value="2"{if isset($newuser) && $newuser->permission == 2} selected{/if}>{$smarty.const.ADMIN|htmlentities:3:'UTF-8'}</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>			
+				&nbsp;
+			</td>
+			<td>
+				<input type="submit" name="submit" value="{$smarty.const.SAVE|htmlentities:3:'UTF-8'}" class="button">
+			</td>
+		</tr>
+		{if isset($username_error)}
+		<tr>
+			<td colspan="2" class="error">			
+				{$username_error|htmlentities:3:'UTF-8'}
+			</td>
+		</tr>
+		{/if}
+	</table>
+	</form>
+	
+	<script>
+		$(document).ready(function() {
+			$.validator.messages["required"] = "{$smarty.const.VALIDATOR_REQUIRED|htmlentities:3:'UTF-8'}";
+			$.validator.messages["email"] = "{$smarty.const.VALIDATOR_EMAIL|htmlentities:3:'UTF-8'}";
+			$.validator.messages["equalTo"] = "{$smarty.const.VALIDATOR_EQUAL_TO}";
+			$("#form").validate({
+				rules: {
+					password: "required",
+					password2: {
+			    		equalTo: "#password"
+					}
+				}
+			});
+		});
+		$("#username").focus();
+	</script>
+</div>
+
+<div class="content">
+	<h3>{$smarty.const.USERS|htmlentities:3:'UTF-8'}</h3>
+	
+	<table>
+		<thead>
+			<tr>
+				<td style="width: 20px;">&nbsp;</td>
+				<td>{$smarty.const.USER_NAME|htmlentities:3:'UTF-8'}</td>
+				<td>{$smarty.const.EMAIL|htmlentities:3:'UTF-8'}</td>
+				<td>{$smarty.const.ROLE|htmlentities:3:'UTF-8'}</td>
+				<td style="width: 200px;">{$smarty.const.LAST_LOGGED_IN|htmlentities:3:'UTF-8'}</td>
+				<td style="width: 20px;">&nbsp;</td>
+			</tr>
+		</thead>
+		<tbody>
+			{section name=u loop=$users}
+			<tr>
+				<td>
+					<a href="./?go=user&id={$users[u]->id}"><img src="{$tpl_include}images/icons/16x16/user_edit.png" alt="{$smarty.const.EDIT|htmlentities:3:'UTF-8'}" title="{$smarty.const.EDIT|htmlentities:3:'UTF-8'}"></a>
+				</td>
+				<td>
+					<a href="./?go=user&id={$users[u]->id}">
+					{$users[u]->username|htmlentities:3:'UTF-8'}
+					</a>
+				</td>
+				<td>
+					<a href="mailto:{$users[u]->email|htmlentities:3:'UTF-8'}">
+					{$users[u]->email|htmlentities:3:'UTF-8'}
+					</a>
+				</td>
+				<td>
+					{if $users[u]->permission == 0}{$smarty.const.GUEST|htmlentities:3:'UTF-8'}{/if}
+					{if $users[u]->permission == 1}{$smarty.const.EDITOR|htmlentities:3:'UTF-8'}{/if}
+					{if $users[u]->permission == 2}{$smarty.const.ADMIN|htmlentities:3:'UTF-8'}{/if}
+				</td>
+				<td>
+					{if $users[u]->lastlogin != '0000-00-00 00:00:00'}{$users[u]->lastlogin}{/if}
+				</td>
+				<td>
+					{if $User->isAdmin() && $users[u]->username != "admin"}
+					<a href="javascript:void(0);" onclick="if(confirm('{$smarty.const.CONFIRM_REMOVE|htmlentities:3:'UTF-8'}')) location.href='./?go=deleteuser&id={$users[u]->id}';"><img src="{$tpl_include}images/icons/16x16/delete.png" alt="{$smarty.const.REMOVE|htmlentities:3:'UTF-8'}" title="{$smarty.const.REMOVE|htmlentities:3:'UTF-8'}"></a>
+					{/if}
+				</td>
+			</tr>
+			{/section}
+		</tbody>
+	</table>
+</div>

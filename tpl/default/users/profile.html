@@ -1,0 +1,42 @@
+<div>
+	<h2>My profile</h2>
+	
+	<form name="profileform" method="POST" onsubmit="if(verify(this)) return true; else alert('Some fields are not filled in correctly!'); return false;">
+	<table>
+		<tr id="tr_username">
+			<td nowrap>			
+				User name:
+			</td>
+			<td>
+				<input type="text" name="username" id="text_username_1" value="{$User->username|replace:"\"":"&quot;"}" class="textfield" disabled style="width: 100px;">
+			</td>
+		</tr>
+		<tr id="tr_password">
+			<td nowrap>			
+				Password:
+			</td>
+			<td>
+				<input type="password" name="password" id="text_password_0" value="" class="textfield" style="width: 100px;">
+			</td>
+		</tr>
+		<tr id="tr_password2">
+			<td nowrap>			
+				Password (again):
+			</td>
+			<td>
+				<input type="password" name="password2" id="text_password2_0" value="" class="textfield" style="width: 100px;">
+			</td>
+		</tr>
+		<tr id="tr_email">
+			<td nowrap>			
+				E-mail:
+			</td>
+			<td>
+				<input type="text" name="email" id="email_email_1" value="{$User->email|replace:"\"":"&quot;"}" class="textfield" style="width: 200px;">
+				<input type="hidden" name="update" value="0">
+				<input type="submit" name="submit" value="update" class="button">
+			</td>
+		</tr>
+	</table>
+	</form>
+</div>

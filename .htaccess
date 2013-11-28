@@ -1,0 +1,11 @@
+# no indexing
+Options -Indexes
+
+# php flag
+php_flag register_globals off
+
+# hidden files
+<Files ~ "common.inc.php">
+	Order Deny,Allow
+	Deny from all
+</Files>

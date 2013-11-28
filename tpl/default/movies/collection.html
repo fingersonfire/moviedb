@@ -1,0 +1,149 @@
+<nav>
+	<div id="search">
+		<div class="row">
+			<div class="searchbox">
+				<input type="text" id="q" autocomplete="off">
+				<input id="dq" type="hidden" value="{$smarty.const.SEARCH_DEFAULT_TEXT|htmlentities:3:'UTF-8'}">
+				<input id="p" type="hidden">
+			</div>
+		</div>
+	</div>
+	
+	<ul>
+		{if $loggedin && $User->isEditor()}
+		<li>
+			<div class="button">
+				<div>
+					<a href="./?go=add"><img src="{$tpl_include}images/icons/32x32/add.png" alt="{$smarty.const.ADD_MOVIE|htmlentities:3:'UTF-8'}" title="{$smarty.const.ADD_MOVIE|htmlentities:3:'UTF-8'}"><br/>
+					{$smarty.const.ADD_MOVIE|htmlentities:3:'UTF-8'}</a>
+				</div>
+			</div>
+		</li>
+		{/if}
+		
+		{if $loggedin && $User->isEditor()}
+		<li>
+			<div class="button">
+				<div>
+					<a href="./?go=imdbupdate"><img src="{$tpl_include}images/icons/32x32/update.png" alt="{$smarty.const.UPDATE_ALL_MOVIE_INFORMATION|htmlentities:3:'UTF-8'}" title="{$smarty.const.UPDATE_ALL_MOVIE_INFORMATION|htmlentities:3:'UTF-8'}"><br/>
+					{$smarty.const.UPDATE_ALL_MOVIE_INFORMATION|htmlentities:3:'UTF-8'}</a>
+				</div>
+			</div>
+		</li>
+		{/if}
+	
+		<li>
+			<div class="button">
+				<div>
+					<a href="./?go=export"><img src="{$tpl_include}images/icons/32x32/export_excel.png" alt="{$smarty.const.EXPORT_TO_CSV|htmlentities:3:'UTF-8'}" title="{$smarty.const.EXPORT_TO_CSV|htmlentities:3:'UTF-8'}"><br/>
+					{$smarty.const.EXPORT_TO_CSV|htmlentities:3:'UTF-8'}</a>
+				</div>
+			</div>
+		</li>
+	</ul>
+</nav>
+
+<div class="sort">
+	<select id="n" onchange="search();">
+		<option value="0">{$smarty.const.ALL|htmlentities:3:'UTF-8'} {$smarty.const.RESULTS_PER_PAGE|htmlentities:3:'UTF-8'}</option>
+		{section name=n loop=$resultsperpage}
+		<option value="{$resultsperpage[n]}">{$resultsperpage[n]|htmlentities:3:'UTF-8'} {$smarty.const.RESULTS_PER_PAGE|htmlentities:3:'UTF-8'}</option>
+		{/section}
+	</select>
+	
+	<select id="sort" onchange="search();">
+		{section name=s loop=$sortoptions}
+		<option value="{$sortoptions[s]}">{$smarty.const.SORT_BY|htmlentities:3:'UTF-8'} {translate($sortoptions[s])|htmlentities:3:'UTF-8'}</option>
+		{/section}
+	</select>
+	
+	<select id="category" onchange="search();">
+		<option value="">{$smarty.const.ALL_CATEGORIES|htmlentities:3:'UTF-8'}</option>
+		{section name=c loop=$categories}
+		<option value="{$categories[c]}">{translate($categories[c])|htmlentities:3:'UTF-8'}</option>
+		{/section}
+	</select>
+</div>
+	
+<div id="loading"></div>
+
+<div id="results"></div>
+
+<script>
+	$(document).ready(function() {
+		// Load parameters from cookie
+		if($.cookie("search")) {
+			$("#q").val($.cookie("search"));
+		}
+		if($.cookie("category")) {
+			$("#category").val($.cookie("category"));
+		}
+		if($.cookie("sort")) {
+			$("#sort").val($.cookie("sort"));
+		}
+		if($.cookie("page")) {
+			$("#p").val($.cookie("page"));
+		}
+		if($.cookie("results")) {
+			$("#n").val($.cookie("results"));
+		}
+		
+		// Set parameters from url when the page is loaded
+		var parameters = getQueryStringParameters();
+		if(parameters["search"]) {
+			$("#q").val(parameters["search"]);
+		}
+		if(parameters["category"]) {
+			$("#category").val(parameters["category"]);
+		}
+		if(parameters["sort"]) {
+			$("#sort").val(parameters["sort"]);
+		}
+		if(parameters["page"]) {
+			$("#p").val(parameters["page"]);
+		}
+		if(parameters["results"]) {
+			$("#n").val(parameters["results"]);
+		}
+		
+		// Default search text
+		$("#q").blur(function() {
+			if(this.value.trim() == '') { this.value = $("#dq").val(); $("#q").addClass('inputDefault'); }
+		});
+		$("#q").focus(function() {
+			this.value = (this.value == $("#dq").val()) ? '' : this.value; $("#q").removeClass('inputDefault');
+		});
+		$("#q").focus();
+		$("#q").blur();
+		
+		// Search handling
+		$("#q").keypress(function(event) {
+			if ( event.which == 13 ) {
+	     		search();
+			}
+		});
+		
+		// Style selects
+		$('select#category').selectmenu({
+			width: 150,
+			select: function(event, options) {
+				search();
+			}
+		});
+		$('select#sort').selectmenu({
+			width: 250,
+			select: function(event, options) {
+				search();
+			}
+		});
+		$('select#n').selectmenu({
+			width: 200,
+			select: function(event, options) {
+				search();
+			}
+		});
+
+		// Search by default
+		search();
+	});
+</script>

@@ -1,0 +1,22 @@
+{if $pages > 1}
+<div class="pager">
+	{if $startAt > 1}
+		<a href="javascript:void(0);" onclick="setPage(0);">
+			1</a>
+		{if $startAt-1 >= 2}<span class="space">...</span>{/if}
+	{/if}
+	{section name=pages start=$startAt loop=$stopAt+1}
+		{if $smarty.section.pages.index == $page}
+			<span class="current">{$smarty.section.pages.index}</span>
+		{else}
+			<a href="javascript:void(0);" onclick="setPage({$smarty.section.pages.index-1});">
+				{$smarty.section.pages.index}</a>
+		{/if}
+	{/section}
+	{if $stopAt+1 <= $pages} 
+		{if $stopAt+1 < $pages}<span class="space">...</span>{/if}
+		<a href="javascript:void(0);" onclick="setPage({$pages-1});">
+			{$pages}</a>
+	{/if}
+</div>
+{/if}

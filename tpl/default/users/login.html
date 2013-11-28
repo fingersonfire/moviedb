@@ -1,0 +1,47 @@
+{if !$loggedin}
+<div id="login">
+	<form id="loginform" name="loginform" method="POST">
+	<table>
+		<tr>
+			<td style="width: 110px; white-space: nowrap;">
+				{$smarty.const.USER_NAME|htmlentities:3:'UTF-8'}
+			</td>
+			<td>
+				<input type="text" name="username" id="username" value="{if isset($username)}{$username|htmlentities:3:'UTF-8'}{/if}" class="required">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				{$smarty.const.PASSWORD|htmlentities:3:'UTF-8'}
+			</td>
+			<td>
+				<input type="password" name="password" class="required">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				&nbsp;
+			</td>
+			<td>
+				<input type="submit" name="submit" value="{$smarty.const.LOG_IN|htmlentities:3:'UTF-8'}">
+			</td>
+		</tr>
+		{if isset($login_error)}
+		<tr>
+			<td colspan="2" class="error">
+				{$smarty.const.INCORRECT_USERNAME_OR_PASSWORD|htmlentities:3:'UTF-8'}
+			</td>
+		</tr>
+		{/if}
+	</table>
+	</form>
+
+	<script>
+		$(document).ready(function() {
+			$.validator.messages["required"] = "";
+			$("#loginform").validate();
+		});
+		$("#username").focus();
+	</script>
+</div>
+{/if}
