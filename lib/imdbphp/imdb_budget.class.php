@@ -11,7 +11,7 @@
 # under the terms of the GNU General Public License (see doc/LICENSE)       #
 #############################################################################
 
-/* $Id: imdb_budget.class.php 482 2011-10-27 15:24:38Z izzy $ */
+/* $Id: imdb_budget.class.php 610 2013-10-14 00:15:01Z izzy $ */
 
 require_once (dirname(__FILE__)."/movie_base.class.php");
 
@@ -24,7 +24,7 @@ require_once (dirname(__FILE__)."/movie_base.class.php");
  * @extends movie_base
  * @author Isyankar
  * @author Izzy (izzysoft AT qumran DOT org)
- * @version $Revision: 482 $ $Date: 2011-10-27 17:24:38 +0200 (Thu, 27 Oct 2011) $
+ * @version $Revision: 610 $ $Date: 2013-10-14 02:15:01 +0200 (Mo, 14. Okt 2013) $
  */
 class imdb_budget extends movie_base {
 
@@ -36,7 +36,7 @@ class imdb_budget extends movie_base {
   */
  function __construct($id) {
    parent::__construct($id);
-   $this->revision = preg_replace('|^.*?(\d+).*$|','$1','$Revision: 482 $');
+   $this->revision = preg_replace('|^.*?(\d+).*$|','$1','$Revision: 610 $');
    $this->setid($id);
    $this->reset_vars();
  }
@@ -83,13 +83,13 @@ class imdb_budget extends movie_base {
 #====================================================[ /business page ]=== 
 
  /* Get budget
-  * @method get_budget
+  * @method protected get_budget
   * @param ref string budg
   * @return string
   * @brief Assuming budget is estimated, and in american dollar
   * @see IMDB page / (TitlePage)
   */
- private function get_budget(&$budg){
+ protected function get_budget(&$budg){
      // Tries to get a single entry
      if (@preg_match("!(.*?)\s*\(estimated\)!ims",$budg,$opWe)){ 
          $result = $opWe[1];
@@ -118,12 +118,12 @@ class imdb_budget extends movie_base {
 
  #-------------------------------------------------[ Openingbudget ]---
  /** Get opening weekend budget
-  * @method get_openingWeekend
+  * @method protected get_openingWeekend
   * @param ref string listOpening
   * @return array[0..n] of array[value,country,date,nbScreens]
   * @see IMDB page
   */
- private function get_openingWeekend(&$listOpening){
+ protected function get_openingWeekend(&$listOpening){
    $result = array();
    $temp = $listOpening;
 
@@ -188,12 +188,12 @@ class imdb_budget extends movie_base {
 
  #-------------------------------------------------[ Gross ]---
  /** Get gross budget
-  * @method get_gross
+  * @method protected get_gross
   * @param ref string listGross
   * @return array[0..n] of array[value,country,date]
   * @see IMDB page / (TitlePage)
   */
- private function get_gross(&$listGross) {
+ protected function get_gross(&$listGross) {
    $result = array();
    $temp = $listGross;
    $i = 0;
@@ -254,12 +254,12 @@ class imdb_budget extends movie_base {
 
  #-------------------------------------------------[ Weekend Gross ]---
  /** Get weekend gross budget
-  * @method get_weekendGross
+  * @method protected get_weekendGross
   * @param ref string listweekendGross
   * @return array[0..n] of array[value,country,date,nbScreens]
   * @see IMDB page / (TitlePage)
   */
- private function get_weekendGross(&$listweekendGross){
+ protected function get_weekendGross(&$listweekendGross){
    $result = array();
    $temp = $listweekendGross;
    $i = 0;
@@ -325,12 +325,12 @@ class imdb_budget extends movie_base {
 
  #-------------------------------------------------[ Admissions ]---
  /** Get admissions budget
-  * @method get_admissions
+  * @method protected get_admissions
   * @param ref string listAdmissions
   * @return array[0..n] of array[value,country,date]
   * @see IMDB page / (TitlePage)
   */
- private function get_admissions(&$listAdmissions) {
+ protected function get_admissions(&$listAdmissions) {
    $result = array();
    $temp = $listAdmissions;
    $i = 0;

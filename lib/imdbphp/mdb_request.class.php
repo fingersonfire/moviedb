@@ -9,7 +9,7 @@
  # under the terms of the GNU General Public License (see doc/LICENSE)       #
  #############################################################################
 
- /* $Id: mdb_request.class.php 468 2011-10-11 11:14:24Z izzy $ */
+ /* $Id: mdb_request.class.php 609 2013-10-06 12:23:54Z izzy $ */
 
 if ( isset($PEAR) && $PEAR ) { // Use the HTTP_Request class from the PEAR project.
   require_once("HTTP/Request.php");
@@ -68,6 +68,9 @@ if ( isset($PEAR) && $PEAR ) { // Use the HTTP_Request class from the PEAR proje
         elseif ( in_array('HTTP_REFERER',array_keys($_SERVER)) ) $this->addHeaderLine('Referer',$_SERVER['HTTP_REFERER']);
       }
       if ($iconf->force_agent) $this->addHeaderLine('User-Agent', $iconf->force_agent);
+      // include language option in the request (if specified):
+      $language = trim($iconf->language);
+      if (strlen($language) > 0) $this->addHeaderLine('Accept-Language', $language);
     }
     /** Send a request to the movie site
      * @method sendRequest

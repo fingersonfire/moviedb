@@ -10,7 +10,7 @@
  # under the terms of the GNU General Public License (see doc/LICENSE)       #
  #############################################################################
 
- /* $Id: movieposterdb.class.php 466 2011-09-11 20:19:49Z izzy $ */
+ /* $Id: movieposterdb.class.php 599 2013-09-22 13:47:40Z izzy $ */
 
  require_once (dirname(__FILE__)."/mdb_base.class.php");
 
@@ -21,7 +21,7 @@
  * @extends mdb_base
  * @author Izzy (izzysoft AT qumran DOT org)
  * @copyright (c) 2009 by Itzchak Rehberg and IzzySoft
- * @version $Revision: 466 $ $Date: 2011-09-11 22:19:49 +0200 (Sun, 11 Sep 2011) $
+ * @version $Revision: 599 $ $Date: 2013-09-22 15:47:40 +0200 (So, 22. Sep 2013) $
  */
 class movieposterdb extends mdb_base {
 
@@ -38,6 +38,7 @@ class movieposterdb extends mdb_base {
     parent::__construct($id);
     $this->setid($id);
     $this->reset_lang();
+    $this->revision = preg_replace('|^.*?(\d+).*$|','$1','$Revision: 599 $');
     if ($this->force_agent) $this->user_agent = $this->force_agent;
     elseif ( in_array('HTTP_USER_AGENT',array_keys($_SERVER)) ) $this->user_agent = $_SERVER['HTTP_USER_AGENT'];
     else $this->user_agent = $this->default_agent;
@@ -49,7 +50,7 @@ class movieposterdb extends mdb_base {
    * @method protected parse_list
    * @param optional string type (what image URLs to retrieve: 'poster' (default),
    *        'cover', 'textless', 'logo', 'other', 'unset')
-   * @return array array of arrays[lang,url]
+   * @return array array of arrays[lang,url,title]
    */
   protected function parse_list($type='poster',$page_url='') {
     $url  = 'http://www.movieposterdb.com/movie/'.$this->imdbid().'/';
@@ -57,36 +58,33 @@ class movieposterdb extends mdb_base {
     $doc = new DOMDocument();
     @$doc->loadHTML($page);
     $xp = new DOMXPath($doc);
-    $nodes = $xp->query("//a[contains(@href,\"/poster/\")]");
-    $nodes2 = $xp->query("//img[@class=\"flag\"]");
-    $nodes3 = $xp->query("//img[starts-with(@alt,\"Category\")]");
-    foreach ($nodes as $node) {
-      $img = $node->firstChild;
-      $att = $img->tagName;
-      $xx=0;
-      while (strtolower($att)!='img') {
-        $img = $img->nextSibling;
-        $att = $img->tagName;
-        $xx++; if ($xx>5) break; // prevent endless loops
+    $posters = array();
+    $cells = $xp->query("//td[@class=\"poster\"]");
+    foreach ($cells as $cell) {
+      $imgs = $cell->getElementsByTagName('img');
+      foreach ($imgs as $imga) {
+        $tit = $imga->getAttribute('alt');
+        if ( !empty($tit) ) {
+          if ( !preg_match('!'.$type.'$!i',$tit) ) { // skip wrong types
+            continue 2;
+          }
+          $i['title'] = $tit;
+          $i['url'] = $imga->getAttribute('src');
+          break;
+        }
       }
-      $baseimgs[] = $img->getAttribute('src');
-    }
-    foreach ($nodes2 as $node) $baselangs[] = $node->getAttribute('alt');
-    foreach ($nodes3 as $node) {
-      $l = explode(': ',$node->getAttribute('alt'));
-      $basecats[]  = $l[1];
-    }
-    $urls = array();
-    for ($i=0;$i<count($baselangs);++$i) {
-      if (!empty($this->langs)) {
-        if ( !in_array(strtolower($baselangs[$i]),$this->langs) ) continue;
+      $infos = $cell->getElementsByTagName('p');
+      foreach ($infos as $info) {
+        $spans = $info->getElementsByTagName('span');
+        foreach ($spans as $span) {
+          if ( preg_match('!flag flag-([A-z]+)!', $span->getAttribute('class'), $match) ) {
+            $i['lang'] = $match[1];
+          }
+        }
       }
-      if ( strtolower($basecats[$i]) != $type ) continue;
-      $im['lang'] = $baselangs[$i];
-      $im['url']  = $baseimgs[$i];
-      $urls[] = $im;
+      $elems[] = $i;
     }
-    return $urls;
+    return $elems;
   }
 
 #---------------------------------------------------------[ public methods ]---

@@ -9,25 +9,19 @@
  # under the terms of the GNU General Public License (see doc/LICENSE)       #
  #############################################################################
 
- /* $Id: movie.php 481 2011-10-12 10:45:48Z izzy $ */
+ /* $Id: movie.php 594 2013-09-19 22:23:55Z izzy $ */
 
-if (isset ($_GET["mid"])) {
+if (isset ($_GET["mid"]) && preg_match('/^[0-9]+$/',$_GET["mid"])) {
   $movieid = $_GET["mid"];
   $engine  = $_GET["engine"];
 
   switch($engine) {
-    case "pilot":
-        require("pilot.class.php");
-        $movie = new pilot($_GET["mid"]);
-        $charset = "utf8";
-        $source  = "<A HREF='?engine=imdb&mid=$movieid'>IMDB</A> | <B CLASS='active'>MoviePilot</B>";
-        if ($movie->get_pilot_imdbfill()) $source .= '<SUP>+i</SUP>';
-        break;
     default:
         require("imdb.class.php");
         $movie = new imdb($_GET["mid"]);
-        $charset = "iso-8859-1";
-        $source  = "<B CLASS='active'>IMDB</B> | <A HREF='?engine=pilot&mid=$movieid'>MoviePilot</A>";
+        //$charset = "iso-8859-1";
+        $charset = "utf8";
+        $source  = "<B CLASS='active'>IMDB</B>";
         break;
   }
 
@@ -92,6 +86,13 @@ if (isset ($_GET["mid"])) {
     ++$rows;
     echo '<TR><TD><B>Seasons:</B></TD><TD>'.$movie->seasons()."</TD></TR>\n";
     flush();
+  }
+
+  # Episode Details
+  $ser = $movie->get_episode_details();
+  if (!empty($ser)) {
+    ++$rows;
+    echo '<TR><TD><B>Series Details:</B></TD><TD>'.$ser['seriestitle'].' Season '.$ser['season'].', Episode '.$ser['episode'].", Airdate ".$ser['airdate']."</TD></TR>\n";
   }
 
   # Year & runtime
@@ -302,15 +303,12 @@ if (isset ($_GET["mid"])) {
   }
 
   # Seasons
-  $seasons = $movie->seasons();
-  if ( $seasons != 0 ) {
+  if ( $movie->is_serial() || $movie->seasons() ) {
     ++$rows;
     $episodes = $movie->episodes();
     echo '<tr><td valign=top><b>Episodes:</b></td><td>';
-    for ( $season = 0; $season <= $seasons; ++$season ) {
-      $eps = @count($episodes[$season]);
-      for ( $episode = 0; $episode < $eps; ++$episode ) {
-        $episodedata = &$episodes[$season][$episode];
+    foreach ( $episodes as $season => $ep ) {
+      foreach ( $ep as $episodedata ) {
         echo '<b>Season '.$episodedata['season'].', Episode '.$episodedata['episode'].': <a href="'.$_SERVER["PHP_SELF"].'?mid='.$episodedata['imdbid'].'">'.$episodedata['title'].'</a></b> (<b>Original Air Date: '.$episodedata['airdate'].'</b>)<br>'.$episodedata['plot'].'<br/><br/>';
       }
     }
@@ -398,8 +396,8 @@ if (isset ($_GET["mid"])) {
     echo "<table align='center' border='1' style='border-collapse:collapse;background-color:#ddd;'><tr><th style='background-color:#07f;'>Soundtrack</th><th style='background-color:#07f;'>Credit 1</th><th style='background-color:#07f;'>Credit 2</th></tr>";
     for ($i=0;$i<5;++$i) {
       if (empty($soundtracks[$i])) break;
-      $credit1 = preg_replace("/http\:\/\/".str_replace(".","\.",$movie->imdbsite)."\/name\/nm(\d{7})\//","person.php?engine=$engine&mid=\\1",$soundtracks[$i]["credits"][0]);
-      $credit2 = preg_replace("/http\:\/\/".str_replace(".","\.",$movie->imdbsite)."\/name\/nm(\d{7})\//","person.php?engine=$engine&mid=\\1",$soundtracks[$i]["credits"][1]);
+      $credit1 = preg_replace("/http\:\/\/".str_replace(".","\.",$movie->imdbsite)."\/name\/nm(\d{7})\//","person.php?engine=$engine&mid=\\1",$soundtracks[$i]["credits"][0]['credit_to'])." (".$soundtracks[$i]["credits"][0]['desc'].")";
+      $credit2 = preg_replace("/http\:\/\/".str_replace(".","\.",$movie->imdbsite)."\/name\/nm(\d{7})\//","person.php?engine=$engine&mid=\\1",$soundtracks[$i]["credits"][1]['credit_to'])." (".$soundtracks[$i]["credits"][1]['desc'].")";
       echo "<tr><td>".$soundtracks[$i]["soundtrack"]."</td><td>$credit1</td><td>$credit2</td></tr>";
     }
     echo "</table></td></tr>\n";

@@ -9,7 +9,7 @@
  # under the terms of the GNU General Public License (see doc/LICENSE)       #
  #############################################################################
 
- /* $Id: imdb_person.class.php 484 2011-12-17 23:03:01Z izzy $ */
+ /* $Id: imdb_person.class.php 610 2013-10-14 00:15:01Z izzy $ */
 
  require_once (dirname(__FILE__)."/person_base.class.php");
  require_once (dirname(__FILE__)."/imdbsearch.class.php");
@@ -21,7 +21,7 @@
   * @extends mdb_base
   * @author Izzy (izzysoft AT qumran DOT org)
   * @copyright 2008 by Itzchak Rehberg and IzzySoft
-  * @version $Revision: 484 $ $Date: 2011-12-18 00:03:01 +0100 (Sun, 18 Dec 2011) $
+  * @version $Revision: 610 $ $Date: 2013-10-14 02:15:01 +0200 (Mo, 14. Okt 2013) $
   */
  class imdb_person extends person_base {
 
@@ -52,7 +52,7 @@
    */
   function __construct($id) {
     parent::__construct($id);
-    $this->revision = preg_replace('|^.*?(\d+).*$|','$1','$Revision: 484 $');
+    $this->revision = preg_replace('|^.*?(\d+).*$|','$1','$Revision: 610 $');
     $this->setid($id);
   }
 
@@ -95,7 +95,7 @@
   public function photo($thumb=true) {
     if (empty($this->main_photo)) {
       if ($this->page["Name"] == "") $this->openpage ("Name","person");
-      if (preg_match('!<td id="img_primary".*?>\s*.*?<img.*?src="(.*?)"!ims',$this->page["Name"],$match)) {
+       if (preg_match('!<td.*?id="img_primary".*?>*.*?<img.*?src="(.*?)"!ims',$this->page["Name"],$match)) {
         if ($thumb) $this->main_photo = $match[1];
         else        $this->main_photo = str_replace('_SY140_SX100', '_SY600_SX400',$match[1]);
       } else {
@@ -171,13 +171,13 @@
 
  #----------------------------------------------------------[ Filmographie ]---
   /** Get filmography
-   * @method private filmograf
+   * @method protected filmograf
    * @param ref array where to store the filmography
    * @param string type Which filmografie to retrieve ("actor",)
    */
-  private function filmograf(&$res,$type) {
+  protected function filmograf(&$res,$type) {
     if ($this->page["Name"] == "") $this->openpage ("Name","person");
-    preg_match("!<a name=\"$type\"(.*?)<div (id|class)=\">!msi",$this->page["Name"],$match);
+    preg_match("!<a name=\"$type\"(.*?(<div id=\"filmo|<script))!msi",$this->page["Name"],$match);
     if (empty($type)) $match[1] = $this->page["Name"];
     elseif (empty($match[1])) {
       $pos   = strpos($this->page['Name'],'<a name="'.ucfirst($type).'"');
@@ -187,19 +187,19 @@
       }
     }
     else $match[1] = str_replace("</li><li>","</li>\n<li>",$match[1]); // *!* ugly workaround for long lists, see Sly (mid=0000230)
-    if (preg_match_all('!<div class="filmo-row.*?>\s*(.*?)\s*<div!ims',$match[1],$matches)) {
+    if ( !empty($match) && preg_match_all('!<div class="filmo-row.*?>\s*(.*?)\s*<div!ims',$match[1],$matches)) {
       $mc = count($matches[0]);
       $year = '';
       for ($i=0;$i<$mc;++$i) {
         $char = array();
-        if (preg_match('!<span class="year_column">(\d{4})(.*?)</span>!ims',$matches[1][$i],$ty)) $year = $ty[1];
-        preg_match('!href="/title/tt(\d{7})/"\s*>(.*?)</a>!ims',$matches[1][$i],$mov);
-        if ( preg_match('!href="/character/ch(\d{7})">(.*?)</a>!ims',$matches[1][$i],$char) ) {
+        if (preg_match('!<span class="year_column">[^<]*(\d{4})(.*?)</span>!ims',$matches[1][$i],$ty)) $year = $ty[1];
+        preg_match('!href="/title/tt(\d{7})/[^"]*"\s*>(.*?)</a>\s*</b>(.*?)<br!ims',$matches[1][$i],$mov);
+        if ( preg_match('!href="/character/ch(\d{7})[^"]*"\s*>(.*?)</a>!ims',$matches[1][$i],$char) ) {
           $chid   = $char[1];
           $chname = $char[2];
         } else {
           $chid   = '';
-          if ( preg_match('!<br/>\s*([^>]+)\s*<div!',$matches[0][$i],$char) ) $chname = $char[1];
+          if ( preg_match('!<br/>\s*([^>]+)\s*<div!',$matches[0][$i],$char) ) $chname = trim($char[1]);
           else $chname = '';
         }
         if ( empty($chname) ) {
@@ -208,7 +208,7 @@
             case 'producer' : $chname = 'Producer'; break;
           }
         }
-        $res[] = array("mid"=>$mov[1],"name"=>$mov[2],"year"=>$year,"chid"=>$chid,"chname"=>$chname,"addons"=>'');
+        $res[] = array("mid"=>$mov[1],"name"=>$mov[2],"year"=>$year,"chid"=>$chid,"chname"=>$chname,"addons"=>trim($mov[3]));
       }
     }
   }
@@ -291,7 +291,7 @@
    * @see IMDB person page / (Main page)
    */
   public function movies_crew() {
-    if (empty($this->crewsfilms)) $this->filmograf($this->crewsfilms,"MiscellaneousCrew");
+    if (empty($this->crewsfilms)) $this->filmograf($this->crewsfilms,"miscellaneous");
     return $this->crewsfilms;
   }
 
@@ -334,7 +334,7 @@
    * @see IMDB person page / (Main page)
    */
   public function movies_archive() {
-    if (empty($this->archivefilms)) $this->filmograf($this->archivefilms,"ArchiveFootage");
+    if (empty($this->archivefilms)) $this->filmograf($this->archivefilms,"archive_footage");
     return $this->archivefilms;
   }
 
@@ -385,10 +385,10 @@
     if (empty($this->birthday)) {
       if ($this->page["Bio"] == "") $this->openpage ("Bio","person");
       if ( preg_match('|Date of Birth</h5>\s*(.*)<br|iUms',$this->page["Bio"],$match) ) {
-        preg_match('|/date/(\d+)-(\d+)/.*?>\d+\s+(.*?)<|',$match[1],$daymon);
+        preg_match('|/search/name\?birth_monthday=(\d+)-(\d+).*?>\d+\s+(.*?)<|',$match[1],$daymon);
         preg_match('|/search/name\?birth_year=(\d{4})|ims',$match[1],$dyear);
         preg_match('|/search/name\?birth_place=.*?">(.*)<|ims',$match[1],$dloc);
-        $this->birthday = array("day"=>$daymon[2],"month"=>$daymon[3],"mon"=>$daymon[1],"year"=>$dyear[1],"place"=>$dloc[1]);
+        $this->birthday = array("day"=>@$daymon[2],"month"=>@$daymon[3],"mon"=>@$daymon[1],"year"=>@$dyear[1],"place"=>@$dloc[1]);
       }
     }
     return $this->birthday;
@@ -405,11 +405,11 @@
     if (empty($this->deathday)) {
       if ($this->page["Bio"] == "") $this->openpage ("Bio","person");
       if (preg_match('|Date of Death</h5>(.*)<br|iUms',$this->page["Bio"],$match)) {
-        preg_match('|/date/(\d+)-(\d+)/.*?>\d+\s+(.*?)<|',$match[1],$daymon);
-	preg_match('|/search/name\?death_date=(\d{4})|ims',$match[1],$dyear);
-	preg_match('/(\,\s*([^\(]+))/ims',$match[1],$dloc);
-	preg_match('/\(([^\)]+)\)/ims',$match[1],$dcause);
-        $this->deathday = array("day"=>$daymon[2],"month"=>$daymon[3],"mon"=>$daymon[1],"year"=>$dyear[1],"place"=>$dloc[2],"cause"=>$dcause[1]);
+        preg_match('|/search/name\?death_monthday=(\d+)-(\d+).*?>\d+\s+(.*?)<|',$match[1],$daymon);
+        preg_match('|/search/name\?death_date=(\d{4})|ims',$match[1],$dyear);
+        preg_match('/(\,\s*([^\(]+))/ims',$match[1],$dloc);
+        preg_match('/\(([^\)]+)\)/ims',$match[1],$dcause);
+        $this->deathday = array("day"=>@$daymon[2],"month"=>@$daymon[3],"mon"=>@$daymon[1],"year"=>@$dyear[1],"place"=>@$dloc[2],"cause"=>@$dcause[1]);
       }
     }
     return $this->deathday;
@@ -444,32 +444,44 @@
  public function spouse() {
    if (empty($this->spouses)) {
      if ($this->page["Bio"] == "") $this->openpage ("Bio","person");
-     $pos_s = strpos($this->page["Bio"],"<h5>Spouse</h5>");
-     if (!$pos_s) return $this->spouses;
-     $pos_e = strpos($this->page["Bio"],"</table>",$pos_s);
-     $block = substr($this->page["Bio"],$pos_s,$pos_e - $pos_s +8);
-     if (@preg_match_all("/<tr>.*?<td.*?>(.*?)<\/td>.*?<td.*?>(.*?)<\/td>/ms",$block,$matches)) { // table lines
-       $mc = count($matches[0]);
-       for ($i=0;$i<$mc;++$i) {
-         unset($tmp);
-         if (preg_match("/href\=\"\/name\/nm(\d{7})\/\">(.*?)<\/a>/i",$matches[1][$i],$match)) { // col#1: MID + name
-           $tmp["imdb"] = trim($match[1]);
-           $tmp["name"] = trim($match[2]);
-         } else {
-           $tmp["name"] = trim($matches[1][$i]);
+     $doc = new DOMDocument();
+     @$doc->loadHTML($this->page["Bio"]);
+     $xp = new DOMXPath($doc);
+     $posters = array();
+     $heads = $doc->getElementsByTagName('h5');
+     foreach($heads as $head) {
+       $found = FALSE;
+       if ( trim($head->nodeValue)!='Spouse' ) continue;
+       $found = TRUE;
+       $tab = $head->nextSibling;
+       while ( (!isset($tab->tagName)||$tab->tagName!='table') && $tab->nextSibling ) $tab = $tab->nextSibling;
+       foreach ($tab->getElementsByTagName('tr') as $sp) {
+         $first = $sp->getElementsByTagName('td')->item(0); // name and IMDBID
+         $nam = trim($first->nodeValue);
+         if ( $href = $first->getElementsByTagName('a')->item(0) ) $mid = preg_replace('!.*/name/nm(\d+).*!','$1',$href->getAttribute('href'));
+         else $mid  = '';
+         $first = $sp->getElementsByTagName('td')->item(1); // additional details
+         $html = $first->ownerDocument->saveXML($first);
+         preg_match_all('!(\(.+?\))!',$html,$matches);
+         $comment = '';
+         $children = '';
+         for ($i=0;$i<count($matches[0]);++$i) {
+           if ($i==0) { // usually the "lifespan" of the relation
+             if ( preg_match('!.(<a href="/date/(?<month>\d+)-(?<day>\d+)/">\d+\s+(?<monthname>[^<]+)</a>)?\s*(?<year>\d{4})!',$matches[0][0],$match) ) { // from date
+               $from = array("day"=>$match['day'],"month"=>$match['month'],"mon"=>$match['monthname'],"year"=>$match['year']);
+             } else $from = array("day"=>'',"month"=>'',"mon"=>'',"year"=>'');
+             if ( preg_match('!(.+?)\s+-\s+(<a href="/date/(?<month>\d+)-(?<day>\d+)/">\d+\s+(?<monthname>[^<]+)</a>)?\s*(?<year>\d{4})!',$matches[0][0],$match) ) { // to date
+               $to = array("day"=>$match['day'],"month"=>$match['month'],"mon"=>$match['monthname'],"year"=>$match['year']);
+             } else $to = array("day"=>'',"month"=>'',"mon"=>'',"year"=>'');
+           }
+           if ($i>0 || empty($from)) $comment .= $matches[0][$i]." ";
          }
-#         if (preg_match("/href\=\"\/OnThisDay\?day\=(\d{1,2}).{1,5}month\=(.*?)\".*\"\/MarriedInYear\?(\d{4})\"/",$matches[2][$i],$match)) { // col#2: date (from)
-#         if (preg_match("/href\=\"\/OnThisDay\?day\=(\d{1,2}).{1,5}month\=(.*?)\".*\"\/MarriedInYear\?(\d{4})\">\d{4}<\/a>(.* href\=\"\/OnThisDay\?day=(\d{1,2}).{1,5}month=(.*?)\".*<\/a>\s*(\d{4})|)/",$matches[2][$i],$match)) { // col#2: date from + to
-#         if (preg_match("/href\=\"\/OnThisDay\?day\=(\d{1,2}).{1,5}month\=(.*?)\".*\"\/MarriedInYear\?(\d{4})\">\d{4}<\/a>(.* href\=\"\/OnThisDay\?day=(\d{1,2}).{1,5}month=(.*?)\".*<\/a>\s*(\d{4})\)|)\s*\((.*?)\)/",$matches[2][$i],$match)) { // col#2: date, comment
-         if (preg_match("/href\=\"\/OnThisDay\?day\=(\d{1,2}).{1,5}month\=(.*?)\".*\"\/MarriedInYear\?(\d{4})\">\d{4}<\/a>(.* href\=\"\/OnThisDay\?day=(\d{1,2}).{1,5}month=(.*?)\".*<\/a>\s*(\d{4})\)|)\s*\((.*?)\)(\s*(\d+) child|)/",$matches[2][$i],$match)) { // col#2: date, children
-           $tmp["from"] = array("day"=>$match[1],"month"=>$match[2],"mon"=>$this->monthNo($match[2]),"year"=>$match[3]);
-           $tmp["to"]   = array("day"=>$match[5],"month"=>$match[6],"mon"=>$this->monthNo($match[6]),"year"=>$match[7]);
-           $tmp["comment"] = $match[8];
-           $tmp["children"] = $match[10];
-         }
-         $this->spouses[] = $tmp;
+         if ( preg_match('!(\d+) child!',$html,$match) ) $children = $match[1];
+         $this->spouses[] = array('imdb'=>$mid,'name'=>$nam,'from'=>$from,'to'=>$to,'comment'=>$comment,'children'=>$children);
        }
+       break;
      }
+     if (!$found) return $this->spouses; // no spouses
    }
    return $this->spouses;
  }
@@ -504,11 +516,11 @@
 
  #-----------------------------------------[ Helper to Trivia, Quotes, ... ]---
   /** Parse Trivia, Quotes, etc (same structs)
-   * @method private parparse
+   * @method protected parparse
    * @param string name
    * @param ref array res
    */
-  private function parparse($name,&$res) {
+  protected function parparse($name,&$res) {
     if ( $this->page["Bio"] == "" ) $this->openpage ("Bio","person");
     $pos_s = strpos($this->page["Bio"],"<h5>$name</h5>");
     $pos_e = strpos($this->page["Bio"],"<br",$pos_s);
@@ -611,13 +623,13 @@
 
  #----------------------------------------------[ Helper for movie parsing ]---
   /** Parse movie helper
-   * @method private parsepubmovies
+   * @method protected parsepubmovies
    * @param ref array res where to store the results
    * @param string page name of the page
    * @param string header header of the block on the IMDB site
    * @brief helper to pubmovies() and portrayedmovies()
    */
-  private function parsepubmovies(&$res,$page,$header) {
+  protected function parsepubmovies(&$res,$page,$header) {
     if ( $this->page[$page] == "" ) $this->openpage ($page,"person");
     $pos_s = strpos($this->page[$page],"<h5>$header</h5>");
     $pos_e = strpos($this->page[$page],"<h5",$pos_s+5);
@@ -656,16 +668,17 @@
 
  #--------------------------------------------[ Helper for Article parsing ]---
   /** Helper for article parsing
-   * @method private parsearticles
+   * @method protected parsearticles
    * @param ref array res where to store the results
    * @param string page name of the page
    * @param string title title of the block
-   * @brief used by interviews(), articles()
+   * @brief used by interviews(), articles(), pictorials(), magcovers()
    * @see IMDB person page /publicity
    */
-  private function parsearticles(&$res,$page,$title) {
+  protected function parsearticles(&$res,$page,$title) {
     if ( $this->page[$page] == "" ) $this->openpage ($page,"person");
     $pos_s = strpos($this->page[$page],"<h5>$title</h5>");
+    if ( $pos_s === FALSE ) { $res = array(); return; }
     $pos_e = strpos($this->page[$page],"</table",$pos_s);
     $block = substr($this->page[$page],$pos_s,$pos_e-$pos_s);
     @preg_match_all("|<tr>(.*)</tr>|iU",$block,$matches); // get the rows
@@ -709,7 +722,7 @@
     return $this->pub_articles;
   }
 
- #--------------------------------------------------------------[ Articles ]---
+ #-------------------------------------------------------------[ Pictorials ]---
   /** Pictorials
    * @method pictorials
    * @return array pictorials array[0..n] of array[inturl,name,date,details,auturl,author]
@@ -722,7 +735,7 @@
     return $this->pub_pictorials;
   }
 
- #--------------------------------------------------------------[ Articles ]---
+ #--------------------------------------------------------------[ Magazines ]---
   /** Magazine cover photos
    * @method magcovers
    * @return array magcovers array[0..n] of array[inturl,name,date,details,auturl,author]
@@ -765,7 +778,7 @@
   * @extends imdbsearch
   * @author Izzy (izzysoft AT qumran DOT org)
   * @copyright 2008-2009 by Itzchak Rehberg and IzzySoft
-  * @version $Revision: 484 $ $Date: 2011-12-18 00:03:01 +0100 (Sun, 18 Dec 2011) $
+  * @version $Revision: 610 $ $Date: 2013-10-14 02:15:01 +0200 (Mo, 14. Okt 2013) $
   */
  class imdbpsearch extends imdbsearch {
  #-----------------------------------------------------------[ Constructor ]---
@@ -776,20 +789,21 @@
      parent::__construct();
    }
 
- #-------------------------------------------------------[ private helpers ]---
+ #-------------------------------------------------------[ protected helpers ]---
   /** Create the IMDB URL for the name search
-   * @method private mkurl
+   * @method protected mkurl
    * @return string url
    */
-  private function mkurl() {
+  protected function mkurl() {
    if ($this->url !== NULL) {
     $url = $this->url;
    } else {
-     $query = ";s=nm";
+     $query = "&s=nm";
      if (!isset($this->maxresults)) $this->maxresults = 20;
-     if ($this->maxresults > 0) $query .= ";mx=20";
+     if ($this->maxresults > 0) $query .= "&mx=20";
      $url = "http://".$this->imdbsite."/find?q=".urlencode($this->name).$query;
    }
+   mdb_base::debug_scalar("Using search URL '$url'");
    return $url;
   }
 
@@ -802,31 +816,42 @@
    */
   public function results($url="",$series=TRUE) {
    if ($this->page == "") {
+     if ($this->usecache && empty($url)) { // Try to read from cache
+       $this->cache_read(urlencode(strtolower($this->name)).'.search',$this->page);
+     } // end cache read
      if (empty($url)) $url = $this->mkurl();
      $be = new MDB_Request($url);
      $be->sendrequest();
      $fp = $be->getResponseBody();
      if ( !$fp ){
        if ($header = $be->getResponseHeader("Location")){
-        if (strpos($header,$this->imdbsite."/find?")) {
-          return $this->results($header);
-          break(4);
-        }
-        $url = explode("/",$header);
-        $id  = substr($url[count($url)-2],2);
-        $this->resu[0] = new imdb_person($id);
-        return $this->resu;
+         mdb_base::debug_scalar("No immediate response body - we are redirected.<br>New URL: $header");
+         if (strpos($header,$this->imdbsite."/find?")) {
+           return $this->results($header);
+           break(4);
+         }
+         $url = explode("/",$header);
+         $id  = substr($url[count($url)-2],2);
+         $this->resu[0] = new imdb_person($id);
+         return $this->resu;
        }else{
-        return NULL;
+         mdb_base::debug_scalar("No result, no redirection -- something's wrong here...");
+         return NULL;
        }
      }
      $this->page = $fp;
+
+     if ($this->storecache && $this->page != "cannot open page" && $this->page != "") { //store cache
+       $this->cache_write(urlencode(strtolower($this->name)).'.search',$this->page);
+     }
    } // end (page="")
 
    if ($this->maxresults > 0) $maxresults = $this->maxresults; else $maxresults = 999999;
    // make sure to catch col #3, not #1 (pic only)
-   preg_match_all('|<tr>\s*<td.*>.*</td>\s*<td.*>.*</td>\s*<td.*<a href="/name/nm(\d{7})[^>]*>([^<]+)</a>(.*)</td>|Uims',$this->page,$matches);
+   //                        photo           name                   1=id        2=name        3=details
+   preg_match_all('|<tr.*>\s*<td.*>.*</td>\s*<td.*<a href="/name/nm(\d{7})[^>]*>([^<]+)</a>\s*(.*)</td>|Uims',$this->page,$matches);
    $mc = count($matches[0]);
+   mdb_base::debug_scalar("$mc matches");
    $mids_checked = array();
    for ($i=0;$i<$mc;++$i) {
      if ($i == $maxresults) break; // limit result count
@@ -838,7 +863,7 @@
      $tmpres  = new imdb_person($pid);
      $tmpres->fullname = $name;
      if (!empty($info)) {
-       if (preg_match('|<small>\((.*),\s*<a href="/title/tt(\d{7})/">(.*)</a>\s*\((\d{4})\)\)|Ui',$info,$match)) {
+       if (preg_match('|<small>\((.*),\s*<a href="/title/tt(\d{7}).*"\s*>(.*)</a>\s*\((\d{4})\)\)|Ui',$info,$match)) {
          $role = $match[1];
          $mid  = $match[2];
          $movie= $match[3];

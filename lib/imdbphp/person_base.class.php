@@ -1,6 +1,6 @@
 <?php
  #############################################################################
- # IMDBPHP.MoviePilot                                    (c) Itzchak Rehberg #
+ # IMDBPHP.Person                                        (c) Itzchak Rehberg #
  # written by Itzchak Rehberg <izzysoft AT qumran DOT org>                   #
  # http://www.izzysoft.de/                                                   #
  # ------------------------------------------------------------------------- #
@@ -8,7 +8,7 @@
  # under the terms of the GNU General Public License (see doc/LICENSE)       #
  #############################################################################
 
- /* $Id: person_base.class.php 325 2010-02-21 21:21:24Z izzy $ */
+ /* $Id: person_base.class.php 594 2013-09-19 22:23:55Z izzy $ */
 
  require_once (dirname(__FILE__)."/browseremulator.class.php");
  require_once (dirname(__FILE__)."/mdb_base.class.php");
@@ -20,7 +20,7 @@
  * @extends mdb_base
  * @author Izzy (izzysoft AT qumran DOT org)
  * @copyright (c) 2009 by Itzchak Rehberg and IzzySoft
- * @version $Revision: 325 $ $Date: 2010-02-21 22:21:24 +0100 (Sun, 21 Feb 2010) $
+ * @version $Revision: 594 $ $Date: 2013-09-20 00:23:55 +0200 (Fr, 20. Sep 2013) $
  */
 class person_base extends mdb_base {
 
@@ -62,6 +62,7 @@ class person_base extends mdb_base {
    $this->birth_name      = "";
    $this->nick_name       = array();
    $this->bodyheight      = array();
+   $this->spouses         = array();
    $this->bio_bio         = array();
    $this->bio_trivia      = array();
    $this->bio_tm          = array();

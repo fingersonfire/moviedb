@@ -1,7 +1,112 @@
-$Id: CHANGELOG 487 2011-12-19 20:23:59Z izzy $
+$Id: CHANGELOG 616 2013-10-20 14:03:50Z izzy $
 
 History for IMDBPHP2
 ====================
+
+v2.2.1 (20.10.2013)
+-------------------
+! again site changes, this time they broke the personal credits (actors, composers, writers, etc.)
+* imdb::yearspan() didn't catch all "delimiters" used on the IMDB sites
++ added new config option "language" (see mdb_config for details – and thanx to strikedaemon for the code!)
+* changed a bunch of methods from private to protected, to allow overriding them by extension classes
+! IMDB decided to introduce another /genre/ link to most popular genres, which messed up the genre() method
+! imdb::plot() and imdb::plot_split() were broken due to another site change
+
+v2.2.0 (22.09.2013)
+-------------------
++ introduced the possibility to override config vars using simple *.ini files (see conf/*)
+- removed Moviepilot classes (the service is no longer operational via its API)
+! fixes to cache.php (listed the same movie over and over)
+* doc/README updated
++ cache.php now uses glob() to speed up file finding
+* some minor code cleanup
++ added some more example code to doc/examples
+
+v2.1.9 (19.09.2013)
+-------------------
+! imdb::alsoknow() and imdb::releaseInfo() were broken due to site changes
+! imdbperson::filmograf() missed some character names due to site changes
+! imdb::soundtrack() was broken due to site changes
+! imdb_person: latest site changes broke all filmografies. fixed.
+! imdb: crazy_credits(), goofs(), quotes(), video_sites() broken due to site changes
++ while fixing imdb::video_sites, discovered more similar content on that page: soundclip_sites(), photo_sites() and misc_sites() added
+! imdb: trivia(), officialSites() broken due to site changes
+! imdb_person: movies_crew() and movies_archive() broken due to site changes
+
+v2.1.8 (26.05.2013)
+-------------------
+* improvements to the imdb::soundtrack() method. Much better results now :)
++ imdb_person::filmograf() now fills the "addons" information again (for all movie_*() methods)
+! imdb_person: articles(), interviews() returned garbage if that information was not available
+! Moviepilot changed API-error message, so instead of displaying the according error we had empty result sets
+! rewrote movieposterdb::parse_list() -- so now the movie posters, logos, covers, etc. should work again
++ added imdb::orig_title() to retrieve the original movie title (if available; otherwise returns "")
++ added imdb::movie_recommendations() to retrieve the "people who liked this..." movies
+* imdb_person::spouse() was missing detail information (most likely due to site changes) -- added them back
+! fixed a bunch of notices in person.php and imdb_person.class.php
+
+v2.1.7 (15.05.2013)
+-------------------
+! site changes again. Fixed: imdb::keywords_all(), imdb::taglines(), imdb:quotes(), imdb::trailers()
+! also due to site changes: fixed imdb::soundtrack() and extended it: soundtrack[i][credit] is now an array[credit_to,desc]
+! fixed imdb::genres() returning duplicate genres due to some added SPANs
+* some cleanup for the plot outline in imdb::plotoutline()
+! fixed imdb::get_episode_details() broken due to site changes
+! fixed imdb::comment_split() broken due to site changes
+! fixed company credits (all four methods have been broken due to site changes)
+* removed some garbage preceding the storyline returned by imdb::storyline()
++ imdbsearch::results() got additional parameters so results can be better filtered. Also added some safeguard for movies having a number before the year, e.g. "Safe (I) (2012)", to prevent empty years
+! fixing imdb::mainPictures() bigsrc
+! fixing minor issue with non-existing thumbnails in imdbphp::thumbphoto()
+
+v2.1.6 (06.02.2012)
+-------------------
+! bunch of IMDB changes broke things again: fixed imdb::votes(), imdb::movietype(), imdb::country(), imdb::genres(), imdb::mpaa_reason()
+! same reason: fixed imdb::thumbphoto() -- and thus all dependent photo methods resolve again
+! same reason, more fixes: imdb::keywords()
+! same reason, fixed imdb::seasons() -- which implicitly fixed the depending imdb::episodes()
+! four more: fixed imdb::is_serial() and imdb::get_episode_details() plus imdb::comment() and imdb::comment_split() due to IMDB site changes
+
+v2.1.5 (06.12.2012)
+-------------------
+! fixed "undefined index" error in imdb::episodes()
+! imdbsearch, imdbperson: site changes completely broke search
++ imdbperson: added caching of search result page
+! imdb::is_serial() and imdb::get_episode_details() were also broken again
+
+v2.1.4 (20.09.2012)
+-------------------
+! imdb::movietype() could no longer distinguish between TV Movie and TV Serie (site changes)
+! imdb::is_serial() invalidated by site changes
+! imdb::movieconnection() was broken due to site changes
+! imdb_person::born() and imdb_person::died() suddenly missed day and month (site change; thanks to GeorgeFive for the fix!)
+* test suite needed a minor update: our example "uncompleted" movie was completed meanwhile, so the test erraneously reported failure
++ imdb::trailers() was incomplete. Thanks to george (ticket:286) it now should fetch more, and I also added the possibility to decide whether to restrict trailers to on-site ones
+* imdb::plotoutline(): removing extra HTML tags from around the storyline
+
+v2.1.3 (15.04.2012)
+-------------------
+! some redirects have not been handled correctly (i.e. when IMDBID xxxxxxx was re-routed to yyyyyyy)
+! imdb::is_serial() and imdb::get_episode_details() were broken due to site changes
+! imdb::episodes() was broken due to site changes. ATTENTION: with this rewrite of the method,
+  the outer array no longer starts at 0 but reflects the real season number (as often requested)!
++ imdb::get_episode_details() - added "airdate" as requested by ticket:290
+! imdb::goofs() and imdb::crazy_credits() where broken due to site changes
+* some adjustments to imdb::trivia - spoilers are now avoided by default. Pass TRUE as only argument to retrieve them separately.
++ some enhancements to genre retrieval (thanks to George!) - now there will be more genres reported :)
+
+v2.1.2 (19.01.2012)
+-------------------
+! site changes broke the imdb class methods keywords(), seasons(), languages(), mpaa_reason(), goofs()
+! site changes confused imdb::extReviews(), imdb::videosites()
+! company info URLs were just the IMDB relative URL w/o protocol and site. Added the missing info
+! if production spanned multiple years (xxxx-yyyy), movie type was setup wrongly ("type xxxx-")
++ added method imdb::endyear() for cases where production spanned multiple years. So for
+  "xxxx-yyyy" this returns "yyyy", while imdb::year() is adjusted to "xxxx". Otherwise, both
+  return the same year.
+! imdb_topcharts::getChartsBoxOffice() was broken. Fixed thanx to hints from razor.
+! imdb::episodes() was completely broken, as the entire page design and structure changed (multiple pages now)
++ added imdb::get_episode_details() to retrieve "uplink info" on episodes
 
 v2.1.1 (19.12.2011)
 -------------------

@@ -11,7 +11,7 @@
  # under the terms of the GNU General Public License (see doc/LICENSE)       #
  #############################################################################
 
- /* $Id: imdb.inc 481 2011-10-12 10:45:48Z izzy $ */
+ /* $Id: imdb.inc 589 2013-09-18 21:43:23Z izzy $ */
 
 require_once("imdb.class.php");
 require_once(dirname(__FILE__)."/helpers.inc");
@@ -35,6 +35,7 @@ switch ($_REQUEST["cache"]) {
 page("Title");
  setid($imdb,"0117500");
  method($imdb,"title");
+ method($imdb,"orig_title");
  method($imdb,"movietype");
  method($imdb,"year");
  method($imdb,"runtime");
@@ -57,9 +58,12 @@ page("Title");
  method($imdb,"mpaa_reason");
  method($imdb,"keywords");
  method($imdb,"keywords_all");
+ method($imdb,"movie_recommendations");
  setid($imdb,"0105946"); // Babylon 5
  method($imdb,"seasons");
- setid($imdb,"1632658"); // Running by Sight
+ setid($imdb,"0517673"); // Babylon 5: No Compromises
+ method($imdb,"get_episode_details");
+ setid($imdb,"3171716"); // Okka Adugu
  method($imdb,"prodNotes");
  setid($imdb,"0094592"); // 14 going 30 (TV)
  method($imdb,"movieTypes");
@@ -129,6 +133,7 @@ page("ParentalGuide");
  method($imdb,"parentalGuide");
 endpage();
 page("OfficialSites");
+ $imdb->page["VideoSites"] = "";
  method($imdb,"officialSites");
 endpage();
 page("Awards");

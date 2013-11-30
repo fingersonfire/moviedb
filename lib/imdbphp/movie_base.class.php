@@ -1,6 +1,6 @@
 <?php
  #############################################################################
- # IMDBPHP.MoviePilot                                    (c) Itzchak Rehberg #
+ # IMDBPHP.Movie                                         (c) Itzchak Rehberg #
  # written by Itzchak Rehberg <izzysoft AT qumran DOT org>                   #
  # http://www.izzysoft.de/                                                   #
  # ------------------------------------------------------------------------- #
@@ -8,7 +8,7 @@
  # under the terms of the GNU General Public License (see doc/LICENSE)       #
  #############################################################################
 
- /* $Id: movie_base.class.php 481 2011-10-12 10:45:48Z izzy $ */
+ /* $Id: movie_base.class.php 594 2013-09-19 22:23:55Z izzy $ */
 
  require_once (dirname(__FILE__)."/browseremulator.class.php");
  require_once (dirname(__FILE__)."/mdb_base.class.php");
@@ -21,7 +21,7 @@
  * @extends mdb_base
  * @author Izzy (izzysoft AT qumran DOT org)
  * @copyright (c) 2009 by Itzchak Rehberg and IzzySoft
- * @version $Revision: 481 $ $Date: 2011-10-12 12:45:48 +0200 (Wed, 12 Oct 2011) $
+ * @version $Revision: 594 $ $Date: 2013-09-20 00:23:55 +0200 (Fr, 20. Sep 2013) $
  */
 class movie_base extends mdb_base {
 
@@ -95,8 +95,10 @@ class movie_base extends mdb_base {
    $this->main_runtime = "";
    $this->main_movietype = "";
    $this->main_title = "";
+   $this->original_title = "";
    $this->main_votes = -1;
    $this->main_year = -1;
+   $this->main_endyear = -1;
    $this->main_yearspan = array();
    $this->main_creator = array();
    $this->main_tagline = "";
@@ -108,6 +110,7 @@ class movie_base extends mdb_base {
    $this->movieconnections = array();
    $this->moviegenres = array();
    $this->moviequotes = array();
+   $this->movierecommendations = array();
    $this->movieruntimes = array();
    $this->mpaas = array();
    $this->mpaas_hist = array();
@@ -124,6 +127,9 @@ class movie_base extends mdb_base {
    $this->taglines = array();
    $this->trailers = array();
    $this->video_sites = array();
+   $this->soundclip_sites = array();
+   $this->photo_sites = array();
+   $this->misc_sites = array();
    $this->trivia = array();
    $this->compcred_prod = array();
    $this->compcred_dist = array();
