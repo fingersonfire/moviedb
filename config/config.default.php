@@ -7,7 +7,7 @@ $settings = array();
 /**
  * Set the languages that are available for the user.
  */
-$settings["languages"] = array("English" => "en_US", "Nederlands" => "nl_NL");
+$settings["languages"] = array("English" => "en_US", "French" => "fr_FR", "Nederlands" => "nl_NL");
 $settings["defaultlanguage"] = "en_US";
 
 /**
