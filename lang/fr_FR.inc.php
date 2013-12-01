@@ -38,7 +38,7 @@ define("INCORRECT_USERNAME_OR_PASSWORD",			"Utilisateur ou mot de passe incorrec
  */
 // Menu
 define("ADD_MOVIE",									"Ajouter un film");
-define("UPDATE_ALL_MOVIE_INFORMATION",				"Tout mettre à jour");
+define("UPDATE_ALL_MOVIE_INFORMATION",				"Mettre à jour");
 define("EXPORT_TO_CSV",								"Exporter");
 // Search
 define("SEARCH_DEFAULT_TEXT",						"Recherche de films...");
