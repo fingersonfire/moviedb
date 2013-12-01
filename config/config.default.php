@@ -71,7 +71,7 @@ $settings["user"]["guestview"] = false;
  * The directory of the template engine Smarty. Default values will do fine.
  */
 if(!isset($template_name))
-	$template_name = "default";
+	$template_name = "php4dvd";
 
 $settings["smarty"]						= array();
 $settings["smarty"]["template_dir"]		= "tpl/";
