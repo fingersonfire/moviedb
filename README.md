@@ -1,7 +1,9 @@
 moviedb
 =======
 
-A fork of php4dvd - A personnal movie database written in PHP/MySQL
+A personnal movie database written in PHP/MySQL
+
+It's a friendly fork of php4dvd 2.0 (http://php4dvd.sourceforge.net/) due to the lack of update.
 
 <b>Features</b>
 
@@ -18,14 +20,15 @@ Layout is based on a template which you can easily adjust
 
 To use these files you need to have a php installation:
 
-Apache 2 or higher
-Php 5.3 or higher
-GD2 library to be able to upload (and resize) covers
-MySQL 5.0 or higher
+* Apache 2 or higher
+* Php 5.3 or higher
+* GD2 library to be able to upload (and resize) covers
+* MySQL 5.0 or higher
 
 <b>Download</b>
 
-Latest release  => https://sourceforge.net/projects/php4dvd/files/latest/download
+For now, you'll have to clone the repository or download master branch. 
+I'm trying to keep it running properly on each commit .
 
 <b>Installation</b>
 
